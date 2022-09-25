@@ -1,0 +1,25 @@
+version: "3"
+services:
+  java-app:
+    container_name: recommendation-system-backend
+    build: .
+    image: "recommendation-system-backend"
+    ports:
+      - "8084:8080"
+    depends_on:
+      - db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/recommendationsystem # db = the name of the container; localhost DOES NOT work; "host.docker.internal" works
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+
+  db:
+    image: postgres
+    restart: always
+    ports: # optional; we set it to be able to access it from our local computer
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: recommendationsystem
+
