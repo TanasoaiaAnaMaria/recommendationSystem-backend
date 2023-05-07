@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class PersoanaDto {
-    private String imagine;
 
     private String nume;
 

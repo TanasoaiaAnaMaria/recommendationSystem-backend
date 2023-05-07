@@ -18,10 +18,13 @@ public class Persoana {
 
     private String imagine;
 
+    @Column(nullable = false)
     private String nume;
 
+    @Column(nullable = false)
     private String prenume;
 
+    @Column(nullable = false, unique = true)
     private String email;
 
     private String parola;

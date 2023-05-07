@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -36,7 +37,7 @@ public class PersoanaService {
         iterblePersoana.forEach(pers->
                 persoane.add(Persoana.builder()
                                 .id(pers.getId())
-                                .imagine(pers.getImagine().length()!=0?azureBlobAdapter.getFileURL(pers.getImagine()):"")
+                                .imagine(pers.getImagine()!=null?azureBlobAdapter.getFileURL(pers.getImagine()):"")
                                 .nume(pers.getNume())
                                 .prenume(pers.getPrenume())
                                 .email(pers.getEmail())
@@ -55,12 +56,44 @@ public class PersoanaService {
         return persoana;
     }
 
-    public Persoana addPersoana (MultipartFile file, PersoanaDto persoanaDto) throws IOException {
-        String fileName="";
-        if(!file.isEmpty())
-            fileName = azureBlobAdapter.upload(file);
+    public Persoana getPersoanaAutentificare(String email, String parola){
+        Optional<Persoana> optionalPersoana = persoanaRepository.findByEmail(email);
+        if (optionalPersoana.isPresent()) {
+            Persoana persoana = optionalPersoana.get();
+            if (persoana.getParola().equals(parola)) {
+                return Persoana.builder()
+                        .id(persoana.getId())
+                        .imagine(persoana.getImagine() != null ? azureBlobAdapter.getFileURL(persoana.getImagine()) : "")
+                        .nume(persoana.getNume())
+                        .prenume(persoana.getPrenume())
+                        .email(persoana.getEmail())
+                        .parola(persoana.getParola())
+                        .build();
+            }
+        }
+        return null;
+
+    }
+
+//    public Persoana addPersoana (MultipartFile file, PersoanaDto persoanaDto) throws IOException {
+//        String fileName="";
+//
+//        if(!file.isEmpty())
+//            fileName = azureBlobAdapter.upload(file);
+//        Persoana persoana=Persoana.builder()
+//                .imagine(fileName)
+//                .nume(persoanaDto.getNume())
+//                .prenume(persoanaDto.getPrenume())
+//                .email(persoanaDto.getEmail())
+//                .parola(persoanaDto.getParola())
+//                .build();
+//        persoanaRepository.save(persoana);
+//        return persoana;
+//    }
+
+    public Persoana addPersoanaInregistrare (PersoanaDto persoanaDto) throws IOException {
+
         Persoana persoana=Persoana.builder()
-                .imagine(fileName)
                 .nume(persoanaDto.getNume())
                 .prenume(persoanaDto.getPrenume())
                 .email(persoanaDto.getEmail())
@@ -91,29 +124,26 @@ public class PersoanaService {
         return persoana;
     }
 
-//    public Persoana updatePersoanaFaraPoza(UUID id, PersoanaDto persoanaDto) {
-//        Persoana persoana=persoanaRepository.findById(id).orElseThrow(()->{
-//            throw new CrudOperationException(MESAJ_DE_EROARE);
-//        });
-//        persoana.setNume(persoanaDto.getNume());
-//        persoana.setPrenume(persoanaDto.getPrenume());
-//        persoana.setDataNasterii(persoanaDto.getDataNasterii());
-//        persoana.setInaltime(persoanaDto.getInaltime());
-//        persoana.setNationalitate(persoanaDto.getNationalitate());
-//        persoana.setPersonal(persoanaDto.getPersonal());
-//        persoana.setPost(persoanaDto.getPost());
-//        persoana.setDescriere(persoanaDto.getDescriere());
-//
-//        persoanaRepository.save(persoana);
-//        return persoana;
-//    }
+   public Persoana updatePersoanaFaraPoza(UUID id, PersoanaDto persoanaDto) throws IOException {
+        Persoana persoana=persoanaRepository.findById(id).orElseThrow(()->{
+            throw new CrudOperationException(MESAJ_DE_EROARE);
+        });
+
+        persoana.setNume(persoanaDto.getNume());
+        persoana.setPrenume(persoanaDto.getPrenume());
+        persoana.setEmail(persoanaDto.getEmail());
+        persoana.setParola(persoanaDto.getParola());
+
+        persoanaRepository.save(persoana);
+        return persoana;
+    }
 
     public void deletePersoana(UUID id){
         Persoana persoana=persoanaRepository.findById(id).orElseThrow(()->{
             throw new CrudOperationException(MESAJ_DE_EROARE);
         });
 
-        if(persoana.getImagine().length()!=0)
+        if(persoana.getImagine()!=null)
             azureBlobAdapter.deleteBlob(persoana.getImagine());
         persoanaRepository.delete(persoana);
     }
