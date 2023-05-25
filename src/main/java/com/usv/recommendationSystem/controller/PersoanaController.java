@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -37,7 +38,7 @@ public class PersoanaController {
         return ResponseEntity.ok(persoanaService.addPersoanaInregistrare(persoanaDto));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/get/{id}")
     public ResponseEntity<Persoana> getPersoanaDupaId(@PathVariable UUID id){
         return ResponseEntity.ok(persoanaService.getPersoanaDupaId(id));
     }
@@ -52,7 +53,7 @@ public class PersoanaController {
         }
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<Persoana> updatePersoana(
             @ApiParam(value = "The ID of the person to update", required = true) @PathVariable UUID id,
             @ApiParam(value = "The details of the person to update", required = true) @ModelAttribute PersoanaDto persoanaDto,
@@ -62,9 +63,14 @@ public class PersoanaController {
         else
             return ResponseEntity.ok(persoanaService.updatePersoanaFaraPoza(id,persoanaDto));
     }
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deletePersoana(@PathVariable UUID id){
         persoanaService.deletePersoana(id);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("/predictie/{id}")
+    public ResponseEntity<String> getPredictie(@PathVariable UUID id, @RequestParam("latitudine") double latitudine, @RequestParam("longitudine") double longitudine){
+        return ResponseEntity.ok(persoanaService.predictie(id,latitudine,longitudine));
     }
 }
