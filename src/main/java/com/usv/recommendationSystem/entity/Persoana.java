@@ -29,4 +29,6 @@ public class Persoana {
 
     private String parola;
 
+    private String preferinte;
+
 }

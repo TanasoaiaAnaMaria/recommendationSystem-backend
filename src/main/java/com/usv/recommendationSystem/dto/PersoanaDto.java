@@ -18,4 +18,6 @@ public class PersoanaDto {
     private String email;
 
     private String parola;
+
+    private String preferinte;
 }
