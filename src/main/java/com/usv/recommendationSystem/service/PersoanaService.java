@@ -170,7 +170,7 @@ public class PersoanaService {
                 double placeLatitude = Double.parseDouble(parts[0].trim());
                 double placeLongitude = Double.parseDouble(parts[1].trim());
 
-                double distance = calculateDistance(userLatitude, userLongitude, placeLatitude, placeLongitude);
+                double distance = calculateDistance(latitudine, longitudine, placeLatitude, placeLongitude);
 
                 if (distance < minDistance) {
                     minDistance = distance;
