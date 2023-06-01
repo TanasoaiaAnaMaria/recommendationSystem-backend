@@ -98,13 +98,38 @@ public class PlacesController {
 
                         for (int i = 0; i < results.length(); i++) {
                             JSONObject place = results.getJSONObject(i);
-                            String placeName = place.getString("name");
-                            JSONObject location = place.getJSONObject("geometry").getJSONObject("location");
-                            double placeLatitude = location.getDouble("lat");
-                            double placeLongitude = location.getDouble("lng");
+                            JSONArray types = place.getJSONArray("types");
 
-                            writer.write(placeLatitude + ", " + placeLongitude + ", " + placeName);
-                            writer.newLine();
+                            // Check if any of the types of the place match any keyword
+                            for (int j = 0; j < types.length(); j++) {
+                                if (keywords.contains(types.getString(j))) {
+                                    String placeName = place.getString("name");
+
+                                    // Make a second API call to check if there are details available for this place
+                                    URIBuilder geocodeUriBuilder = new URIBuilder("https://maps.googleapis.com/maps/api/geocode/json");
+                                    geocodeUriBuilder.addParameter("address", placeName);
+                                    geocodeUriBuilder.addParameter("key", apiKey);
+
+                                    HttpGet geocodeHttpGet = new HttpGet(geocodeUriBuilder.build());
+                                    CloseableHttpResponse geocodeResponse = httpClient.execute(geocodeHttpGet);
+
+                                    if (geocodeResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                                        String geocodeJsonResponse = EntityUtils.toString(geocodeResponse.getEntity());
+
+                                        // If there is content in the response, write the place details to the file
+                                        if (!geocodeJsonResponse.isEmpty()) {
+                                            JSONObject location = place.getJSONObject("geometry").getJSONObject("location");
+                                            double placeLatitude = location.getDouble("lat");
+                                            double placeLongitude = location.getDouble("lng");
+
+                                            writer.write(placeLatitude + ", " + placeLongitude + ", " + placeName);
+                                            writer.newLine();
+                                        }
+                                    }
+
+                                    break; // Once we've written the place, we don't need to check the rest of its types
+                                }
+                            }
                         }
                     }
                 } catch (Exception e) {
@@ -119,4 +144,6 @@ public class PlacesController {
 
         return ResponseEntity.ok().build();
     }
+
+
 }
